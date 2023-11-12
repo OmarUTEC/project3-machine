@@ -11,12 +11,12 @@ class CSVReader {
  public:
   CSVReader() {}
 
-  pair<vector<vector<double>>, vector<string>> get_XY(string filename) {
+  pair<vector<vector<double>>, vector<vector<double>>> get_XY(string filename) {
     ifstream fdata;
     vector<vector<double>> X;
-    vector<string> Y;
+    vector<vector<double>> Y;
     string line;
-
+  
     try {
       fdata = open_file(filename);
     } catch (const std::exception& e) {
@@ -32,7 +32,7 @@ class CSVReader {
 
       /// patient label (M, B)
       getline(iss, token, ',');
-      Y.push_back(token);
+      Y.push_back({(token=="M"?0.0:1.0)});
 
       while (getline(iss, token, ',')) row.push_back(stod(token));
       X.push_back(row);
