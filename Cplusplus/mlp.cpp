@@ -1,7 +1,7 @@
-
 #include <vector>
 #include <cmath>
-#include <iostream>3
+#include <iostream>
+
 using namespace std;
 typedef vector<vector<double>> matriz;
 
@@ -12,6 +12,7 @@ private:
     int fa,_n,_m;
     matriz capas; 
     vector<matriz> pesos;
+
 public:
     Mlp(int n,vector<int> v,int m,int tipo_funcion){
         _n = n;
