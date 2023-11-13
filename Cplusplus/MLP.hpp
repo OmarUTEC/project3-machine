@@ -1,11 +1,9 @@
-#pragma once
-
 #include <cmath>
 #include <iostream>
+#include <random>
 #include <vector>
 
 using namespace std;
-
 typedef vector<vector<double>> matriz;
 
 class MLP {
@@ -15,7 +13,8 @@ class MLP {
   vector<matriz> pesos;
 
  public:
-  MLP(int n, vector<int> v, int m, int tipo_funcion) {
+  MLP(int n, vector<int> v, int m, int tipo_funcion, double min_valor = 0.0,
+      double max_valor = 0.0) {
     _n = n;
     _m = m;
 
@@ -24,18 +23,22 @@ class MLP {
     for (int i = 0; i < v.size(); i++) capas[i + 1].resize(v[i], 0);
     capas[v.size() + 1].resize(m, 0);
 
+    uniform_real_distribution<double> unif(min_valor, max_valor);
+    random_device r;
+    default_random_engine eng{r()};
+
     pesos.resize(v.size() + 1);
-    pesos[0].resize(n, vector<double>(v[0], 0));
+    pesos[0].resize(n, vector<double>(v[0], unif(eng)));
     for (int i = 1; i < v.size(); i++)
-      pesos[i].resize(v[i - 1], vector<double>(v[i], 0));
-    pesos[v.size()].resize(v[v.size() - 1], vector<double>(m, 0));
+      pesos[i].resize(v[i - 1], vector<double>(v[i], unif(eng)));
+    pesos[v.size()].resize(v[v.size() - 1], vector<double>(m, unif(eng)));
 
     fa = tipo_funcion;
   }
 
   double sigmoid(double x) { return 1.0 / (1.0 + exp(-x)); }
 
-  double tanh(double x) { return std::tanh(x); }
+  double tanh(double x) { return tanh(x); }
 
   double relu(double x) { return max(0.0, x); }
 
@@ -67,7 +70,6 @@ class MLP {
       }
     }
   }
-
   void backpropagation(vector<double>& objetivo, double tasa_aprendizaje) {
     vector<double> error_salida(capas[capas.size() - 1].size(), 0);
     for (int i = 0; i < error_salida.size(); i++) {
@@ -145,7 +147,7 @@ class MLP {
 
       double perdida_promedio = perdida_total / entrada.size();
 
-      cout << n_iteracion + 1 << ", Pérdida: " << perdida_promedio << endl;
+      cout << iteracion + 1 << ", Pérdida: " << perdida_promedio << endl;
     }
   }
 };
