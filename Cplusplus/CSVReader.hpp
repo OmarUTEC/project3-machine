@@ -16,8 +16,8 @@ class CSVReader {
     vector<vector<double>> X;
     vector<vector<double>> Y;
     string line;
-    vector<double> malign = {0.0,1.0};
-    vector<double> benign = {1.0,0.0};
+    vector<double> malign = {0.0, 1.0};
+    vector<double> benign = {1.0, 0.0};
     try {
       fdata = open_file(filename);
     } catch (const std::exception& e) {
@@ -33,7 +33,7 @@ class CSVReader {
 
       /// patient label (M, B)
       getline(iss, token, ',');
-      Y.push_back((token=="M"? malign:benign));
+      Y.push_back((token == "M" ? malign : benign));
 
       while (getline(iss, token, ',')) row.push_back(stod(token));
       X.push_back(row);

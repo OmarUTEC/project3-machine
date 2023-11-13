@@ -7,7 +7,7 @@ using namespace std;
 typedef vector<vector<double>> matriz;
 
 
-class Mlp{
+class MLP{
 
 private:
     int fa,_n,_m;
@@ -15,7 +15,7 @@ private:
     vector<matriz> pesos;
 
 public:
-    Mlp(int n,vector<int> v,int m,int tipo_funcion,double min_valor = 0.0, double max_valor = 0.0){
+    MLP(int n,vector<int> v,int m,int tipo_funcion,double min_valor = 0.0, double max_valor = 0.0){
         _n = n;
         _m = m;
 
