@@ -1,8 +1,4 @@
-#include <algorithm>
-#include <cmath>
-#include <iostream>
-#include <random>
-#include <vector>
+#include <bits/stdc++.h>
 
 using namespace std;
 typedef vector<vector<double>> matriz;

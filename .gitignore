@@ -31,5 +31,8 @@
 *.out
 *.app
 
+# files
+MLP.hpp
+
 .vscode
 __pycache__
