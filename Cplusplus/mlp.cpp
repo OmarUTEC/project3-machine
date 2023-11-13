@@ -30,11 +30,16 @@ public:
         default_random_engine eng{r()};
         
         pesos.resize(v.size()+1);
-        pesos[0].resize(n,vector<double>(v[0],unif(eng)));
+        pesos[0].resize(n,vector<double>(v[0]));
+        
         for(int i = 1; i < v.size(); i++)
-            pesos[i].resize(v[i-1],vector<double>(v[i],unif(eng)));
-        pesos[v.size()].resize(v[v.size()-1],vector<double>(m,unif(eng)));
+            pesos[i].resize(v[i-1],vector<double>(v[i]));
+        pesos[v.size()].resize(v[v.size()-1],vector<double>(m));
 
+        for(int i = 0; i < pesos.size(); i++)
+            for(int j = 0; j < pesos[i].size(); j++)
+                for(int k = 0;k < pesos[i][j].size(); k++)
+                    pesos[i][j][k] = unif(eng);
         fa = tipo_funcion;
        
     }
@@ -66,6 +71,18 @@ public:
                 return x;
         }
     }
+   double derivada_activacion(double x) {
+        switch (fa) {
+            case 1:
+                return sigmoid(x) * (1.0 - sigmoid(x));
+            case 2:  
+                return 1.0 - x * x;
+            case 3:  
+                return (x > 0) ? 1.0 : 0.0;
+            default:
+                return 1.0; 
+        }
+    }
 
   
     void forward(vector<double> &entrada) {
@@ -94,36 +111,38 @@ public:
         }
 
        
-        for (int i = 0; i < pesos[pesos.size() - 1].size(); i++) {
-            for (int j = 0; j < pesos[pesos.size() - 1][i].size(); j++) {
-                pesos[pesos.size() - 1][i][j] += tasa_aprendizaje * error_salida[j] * capas[capas.size() - 2][i];
-            }
-        }
-
-       
         for (int i = capas.size() - 2; i > 0; i--) {
             for (int j = 0; j < capas[i].size(); j++) {
                 double error = 0;
-                for (int k = 0; k < capas[i+1].size(); k++) {
+                for (int k = 0; k < capas[i + 1].size(); k++) {
                     error += pesos[i][j][k] * error_salida[k];
                 }
-               
-                for (int k = 0; k < capas[i-1].size(); k++) {
-                    pesos[i-1][k][j] += tasa_aprendizaje * error * capas[i-1][k];
+
+                double derivada = derivada_activacion(capas[i][j]);
+
+                for (int k = 0; k < capas[i - 1].size(); k++) {
+                    double delta = tasa_aprendizaje * error * derivada * capas[i - 1][k];
+                    pesos[i - 1][k][j] += delta;
                 }
             }
         }
+        for(int i = 0; i < capas[1].size(); i++){
+            for(int j = 0; j < _m; j++){
+                cout << pesos[0][i][j] << " ";
+            }
+            cout << endl;
+        }
+
     }
 
-    double softmax(vector<double>& objetivo) {
-        
-        int m = objetivo.size();
+    double softmax() {
+        int m = capas[capas.size() - 1].size();
         double perdida = 0.0;
         vector<double> resultado(m, 0.0);
         double suma_exp = 0.0;
-     
+
         for (int i = 0; i < m; i++) {
-            resultado[i] = exp(objetivo[i]);
+            resultado[i] = exp(capas[capas.size() - 1][i]);
             suma_exp += resultado[i];
         }
 
@@ -133,11 +152,11 @@ public:
 
       
         for (int i = 0; i < m; i++) {
-            perdida += -objetivo[i] * log(resultado[i] + 1e-10);  
+            perdida += -capas[capas.size() - 1][i] * log(resultado[i] + 1e-10);
         }
 
         return perdida;
-    }    
+    }   
     
      void entrenar(matriz& entrada, matriz& salida, int n_iteracion, double tasa_aprendizaje) {
         if(entrada.size() == 0){
@@ -157,21 +176,39 @@ public:
             double perdida_total = 0.0;
 
             for (int i = 0; i < entrada.size(); i++) {
-               
                 forward(entrada[i]);
-
                 backpropagation(salida[i], tasa_aprendizaje);
-
-               
-                perdida_total += softmax(salida[i]);
+                perdida_total += softmax();
             }
 
             double perdida_promedio = perdida_total / entrada.size();
-
-           cout << iteracion + 1 << ", Pérdida: " << perdida_promedio << endl;
+           // cout << iteracion + 1 << ". Pérdida: " << perdida_promedio << endl;
         }
     }
 
-
+    double testing(matriz& entrada, matriz& salida){
+        if(entrada.size() == 0){
+            cout << "No hay datos de testring\n";
+            return -1;
+        }   
+        if(entrada.size() != salida.size()){
+            cout << "No concuerda la cantidad de datos de entrada con la salida\n";
+            return -1;
+        }     
+        int correctos = 0;
+        for(int i = 0; i < entrada.size(); i++){
+            forward(entrada[i]);
+            int tipo = -1, maxi = -1e9;
+            cout << i << ": ";
+            for(int j = 0; j < _m; j++){
+                cout << capas[capas.size()-1][j] << " ";
+                if(maxi < capas[capas.size()-1][j])
+                    maxi = capas[capas.size()-1][j], tipo = j;
+            }
+            cout << endl;
+            if(salida[i][tipo] > 0.99) correctos++;
+        }
+        return (1.0 * correctos) / entrada.size() * 100;
+    }
 
 };
