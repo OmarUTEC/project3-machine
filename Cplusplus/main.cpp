@@ -4,7 +4,6 @@
 
 #include "CSVReader.hpp"
 #include "mlp.cpp"
-#include "utils.hpp"
 
 int main(int argc, char* argv[]) {
   auto reader{CSVReader()};
@@ -19,11 +18,14 @@ int main(int argc, char* argv[]) {
     matriz X_test = {X.begin() + n_train, X.end()};
     matriz Y_test = {Y.begin() + n_train, Y.end()};
 
-    MLP mlp(30, {10}, 2, 1, 0, 1);
-    double tasa_aprendizaje = 0.1;
-    mlp.entrenar(X_train, Y_train, 100, tasa_aprendizaje);
+    for (int i = 0; i < 5; i++) {
+      vector<int> size_capas(i + 1, 50);
+      MLP mlp(30, size_capas, 2, 1, 0, 1);
+      double tasa_aprendizaje = 0.1;
+      mlp.entrenar(X_train, Y_train, 50, tasa_aprendizaje);
+      cout << mlp.testing(X_test, Y_test) << endl;
+    }
 
-    cout << mlp.testing(X_test, Y_test) << endl;
     /*
     int n = 30,m = 1,N,t;
     cout << "Ingrese la cantidad de capas ocultas: ";
